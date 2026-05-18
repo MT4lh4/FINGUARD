@@ -320,11 +320,11 @@ def get_monthly_history() -> list[dict]:
         y, m = row["year"], row["month"]
         spent = round(row["total_spent"], 2)
 
-        # O aya ait tüm kategorilerin limitini topla
+        # O aya ait tüm kategorilerin limitini topla (aktif limiti olan tüm kategoriler)
         conn2 = get_connection()
         categories = conn2.execute(
-            "SELECT DISTINCT category FROM expenses WHERE strftime('%Y-%m', date) = ?",
-            (f"{y}-{m:02d}",)
+            "SELECT DISTINCT category FROM budget_limits WHERE valid_from <= ? AND (valid_to IS NULL OR valid_to > ?)",
+            (f"{y}-{m:02d}-01", f"{y}-{m:02d}-01")
         ).fetchall()
         conn2.close()
 

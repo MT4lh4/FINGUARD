@@ -30,6 +30,7 @@ class ImpulseGuardState(TypedDict):
     budget_status: dict       # Kullanıcının o anki bütçe durumu
     intervention: str         # Gemini'nin müdahale/koçluk metni
     action_decision: str      # "BEKLE", "AL", "ALTERNATIF_BAK", "IPTAL_ET"
+    alternatives: list         # Gemini'nin çıkardığı alternatif ürün listesi
     error: str
 
 
@@ -60,6 +61,7 @@ def analyze_product_node(state: ImpulseGuardState) -> ImpulseGuardState:
 
         # 2) Alternatif ürün araması — site bazlı canlı fiyat sorgusu
         alt_data = ""
+        alt_success = False
         try:
             alt_queries = [
                 f"{product} trendyol fiyat",
@@ -74,8 +76,11 @@ def analyze_product_node(state: ImpulseGuardState) -> ImpulseGuardState:
                         alt_data += f"Alternatif Özeti: {site_results['answer']}\n"
                     for r in site_results.get("results", []):
                         alt_data += f"- {r.get('title')}: {r.get('content', '')[:200]} [{r.get('url', '')}]\n"
+                        alt_success = True
                 except Exception:
                     continue
+            if not alt_success:
+                alt_data += "(Alternatif bilgisi bulunamadı)\n"
         except Exception as e:
             alt_data += f"(Alternatif araması başarısız: {str(e)[:60]})\n"
 
@@ -242,8 +247,18 @@ MESAJ YAZIM KURALLARI:
 Çıktıyı şu JSON formatında ver (Markdown kod bloğu KULLANMA, sadece JSON):
 {{
     "decision": "AL",
-    "message": "Koçluk mesajın buraya..."
-}}"""
+    "message": "Koçluk mesajın buraya...",
+    "alternatives": [
+        {{"site": "Trendyol", "title": "Ürün Adı", "price": 1499.00, "url": "https://..."}}
+    ]
+}}
+
+Alternatif çıkarma kuralları:
+- Sadece trendyol.com, hepsiburada.com, amazon.com.tr, n11.com sitelerini kullan
+- Stokta olmayan ürünleri listeleme
+- En ucuz 3 alternatifi ver
+- Uygun alternatif yoksa boş liste döndür
+- Her alternatif için site, title, price (float), url alanlarını doldur"""
 
 
 def generate_intervention_node(state: ImpulseGuardState) -> ImpulseGuardState:
@@ -273,14 +288,27 @@ def generate_intervention_node(state: ImpulseGuardState) -> ImpulseGuardState:
             contents=prompt,
         )
         
-        # JSON parse işlemi (Gemini bazen ```json etiketi koyabilir)
         text = response.text.replace("```json", "").replace("```", "").strip()
         result_json = json.loads(text)
+
+        alternatives_raw = result_json.get("alternatives", [])
+        alternatives = []
+        if isinstance(alternatives_raw, list):
+            for a in alternatives_raw:
+                if isinstance(a, dict) and a.get("url"):
+                    alternatives.append({
+                        "site": a.get("site", "Mağaza"),
+                        "price": float(a["price"]) if a.get("price") else 0.0,
+                        "url": a.get("url", ""),
+                        "title": str(a.get("title", ""))[:80],
+                        "kind": "alternative",
+                    })
 
         return {
             **state, 
             "action_decision": result_json.get("decision", "BEKLE"),
-            "intervention": result_json.get("message", "Karar alınamadı.")
+            "intervention": result_json.get("message", "Karar alınamadı."),
+            "alternatives": alternatives[:4],
         }
 
     except Exception as e:
@@ -352,7 +380,8 @@ Arama sonuçları:
             "title": a.get("title", "")[:80],
             "kind": "alternative",
         } for a in parsed if a.get("url")][:4]
-    except Exception:
+    except Exception as e:
+        print(f"[FinGuard] extract_alternatives hatasi: {str(e)[:200]}")
         return []
 
 
@@ -366,18 +395,18 @@ def run_impulse_guard(product: str, price: float = 0.0) -> dict:
         "budget_status": {},
         "intervention": "",
         "action_decision": "",
+        "alternatives": [],
         "error": "",
     })
 
-    search_res = result.get("search_results", "")
     return {
         "product": result["product_intent"],
         "category": result["product_category"],
         "decision": result["action_decision"],
         "intervention": result["intervention"],
         "budget_status": result["budget_status"],
-        "search_results": search_res,
-        "alternatives": extract_alternatives(search_res, result["product_intent"]),
+        "search_results": result.get("search_results", ""),
+        "alternatives": result.get("alternatives", []),
         "error": result["error"],
     }
 

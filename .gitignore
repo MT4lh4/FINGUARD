@@ -29,10 +29,33 @@ frontend/dist/
 .DS_Store
 Thumbs.db
 
-# Data
+# Data — users start fresh
 data/*.db
 data/*.json
-!data/mock_*.json
+!data/mock_subscriptions.json
 
 # Logs
 *.log
+
+# AI Tool configs (local only)
+.claude/
+.opencode/
+.gitnexus/
+CLAUDE.md
+AGENTS.md
+
+# Internal planning / sprint docs
+AGENT.md
+BUGS.md
+BUGFIX_PLAN-*.md
+WALKTHROUGH.md
+UI_GUIDE.md
+PROJECT_OVERVIEW.md
+SUGGESTION.md
+
+# Old / backup files
+agents/old*.py
+chrome-extension/old*.js
+
+# Root-level test scripts
+test_slayer.py

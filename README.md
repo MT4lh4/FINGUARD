@@ -21,13 +21,13 @@ Dört uzman ajan ve bir orkestratörle çalışan, **Gemini** tabanlı finans as
 ## Kurulum
 
 ```powershell
-cd c:\Users\muham\Desktop\FINGUARD
+cd <proje-dizini>
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 pip install -r requirements.txt
 ```
 
-Proje kökünde `.env` oluşturun:
+Proje kökünde `.env.example` dosyasını `.env` olarak kopyalayıp API anahtarlarınızı girin:
 
 ```env
 GEMINI_API_KEY=...
@@ -111,4 +111,4 @@ flowchart TB
 
 ## Lisans
 
-Hackathon / kişisel proje — lisans dosyası yoksa ekleyin.
+MIT License — detaylar için [LICENSE](LICENSE) dosyasına bakın.

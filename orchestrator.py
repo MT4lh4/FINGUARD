@@ -162,7 +162,7 @@ def subscription_slayer_node(state: AgentState) -> AgentState:
 def _extract_price_from_text(text: str) -> float:
     """Doğal dilden TL cinsinden fiyat çıkarır."""
     match = re.search(
-        r'(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\s*(?:TL|₺|lira|tl)',
+        r'(\d+(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\s*(?:TL|₺|lira|tl)',
         text, re.IGNORECASE
     )
     if match:

@@ -18,7 +18,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Optional
 from orchestrator import run_orchestrator
 from agents.subscription_slayer import run_subscription_slayer
@@ -48,7 +48,6 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -70,7 +69,7 @@ class ChatResponse(BaseModel):
 
 class ProductAnalysisRequest(BaseModel):
     name: str = "Bilinmeyen Ürün"
-    price: float = 0.0
+    price: float = Field(default=0.0, ge=0)
     site: str = ""
     url: str = ""
 
@@ -282,8 +281,8 @@ async def api_budget_summary(month: int = None, year: int = None):
     from datetime import datetime
     now = datetime.now()
     return get_monthly_summary(
-        month=month or now.month,
-        year=year or now.year
+        month=month if month is not None else now.month,
+        year=year if year is not None else now.year,
     )
 
 

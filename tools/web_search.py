@@ -13,7 +13,7 @@ def get_tavily_client() -> TavilyClient:
     return TavilyClient(api_key=settings.TAVILY_API_KEY)
 
 
-def search_web(query: str, max_results: int = 5) -> list[dict]:
+def search_web(query: str, max_results: int = 5) -> dict:
     """
     Tavily ile web araması yapar.
     
@@ -34,13 +34,14 @@ def search_web(query: str, max_results: int = 5) -> list[dict]:
     return response
 
 
-def search_market(product_or_topic: str) -> dict:
+def search_market(product_or_topic: str, max_results: int = 3) -> dict:
     """
     Piyasa araştırması için özelleştirilmiş arama.
     Birden fazla açıdan arar ve sonuçları birleştirir.
     
     Args:
         product_or_topic: Araştırılacak ürün veya konu
+        max_results: Her sorgu için maksimum sonuç sayısı
     
     Returns:
         Birleştirilmiş arama sonuçları
@@ -61,7 +62,7 @@ def search_market(product_or_topic: str) -> dict:
         try:
             response = client.search(
                 query=q,
-                max_results=3,
+                max_results=max_results,
                 search_depth="advanced",
                 include_answer=True,
             )

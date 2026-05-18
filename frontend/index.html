@@ -1613,7 +1613,7 @@
       disconnected : { label: 'Bağlantı Yok',   color: '#ef4444', pulse: false },
     };
     let _lastConnState = null;
-    let _connFailCount = 0;  // arka arkaya başarısız deneme sayısı
+    let _connFailCount = 0;
 
     function updateConnectionUI(state) {
       if (_lastConnState === state) return;
@@ -1638,7 +1638,6 @@
         if (el && !_agentRunning) el.disabled = (state === 'disconnected');
       });
 
-      // Sadece 2 arka arkaya başarısız denemeden sonra toast göster (false-positive önle)
       if (state === 'disconnected' && _connFailCount >= 2) {
         showToast('⚠️ Backend\'e ulaşılamıyor.', 'error');
       }
@@ -1672,7 +1671,7 @@
       }
       try {
         const res = await fetch(API + '/health', {
-          signal: AbortSignal.timeout(8000)  // 8s — thread pool'dan hızlı dönüyor
+          signal: AbortSignal.timeout(8000)
         });
         if (res.ok) {
           _connFailCount = 0;
@@ -1863,7 +1862,6 @@
       try {
         CATEGORIES = await fetch(API + '/api/categories').then(r => r.json());
       } catch (e) {
-        // Fallback: backend kapalıysa bile çalışsın
         CATEGORIES = [
           {id:'market',     label:'Market',            icon:'🛒'},
           {id:'restoran',   label:'Restoran & Kafe',   icon:'☕'},
@@ -2170,12 +2168,10 @@
         cards.innerHTML = months.map(m => {
           const balance = m.balance || 0;
           const isPos = balance >= 0;
-          // Bug 7: API total_spent / total_limit döndürüyor, m.total/m.limit değil
           const spent = m.total_spent || 0;
           const limit = m.total_limit || 0;
           const pct = limit > 0 ? Math.min(100, Math.round(spent / limit * 100)) : 0;
           const barColor = pct >= 100 ? '#ef4444' : pct >= 80 ? '#f59e0b' : '#10b981';
-          // Bug 7: m.month integer (5), m.label string ("Mayıs 2026")
           const label = m.label || `${m.month}/${m.year}`;
           // selectHistoryMonth için "YYYY-MM" formatı oluştur
           const monthStr = m.year && m.month ? `${m.year}-${String(m.month).padStart(2,'0')}` : '';
@@ -2224,7 +2220,7 @@
         }
         if (moEl) moEl.textContent = months.length;
         if (avgEl) {
-          const totalSpent = months.reduce((s, m) => s + (m.total || 0), 0);
+          const totalSpent = months.reduce((s, m) => s + (m.total_spent || 0), 0);
           const avg = months.length ? Math.round(totalSpent / months.length) : 0;
           avgEl.textContent = avg.toLocaleString('tr-TR') + ' TL';
         }
@@ -2245,7 +2241,6 @@
       input.value = '';
       setAgentRunning(true);
       try {
-        // Önce direkt budget API'yi dene — orchestrator'a bağımlılığı kır
         let budgetData = null;
         let responseText = '';
         try {
@@ -2262,7 +2257,6 @@
             console.log('[Budget] API response:', d);
           }
         } catch (directErr) {
-          // Fallback: orchestrator üzerinden dene
           const data = await callChatAPI(text);
           if (data.budget_data) {
             budgetData = data.budget_data;
@@ -2532,7 +2526,7 @@
 
 
 
-    async function updateBudgetLimit() { } // deprecated, kept for compat
+    async function updateBudgetLimit() { }
 
     /* ── Settings: Load ──────────────────────── */
     async function loadSettings() {

@@ -124,9 +124,10 @@ def save_to_db_node(state: BudgetLoggerState) -> BudgetLoggerState:
         return state
 
     saved_ids = []
+    errors = []
     today = datetime.now().strftime("%Y-%m-%d")
 
-    for item in state["parsed_expenses"]:
+    for item in list(state["parsed_expenses"]):
         try:
             if item.get("action") == "set_limit":
                 from data.budget_db import set_budget_limit
@@ -144,9 +145,11 @@ def save_to_db_node(state: BudgetLoggerState) -> BudgetLoggerState:
                 )
                 saved_ids.append(expense_id)
         except Exception as e:
-            return {**state, "error": f"Veritabanı kayıt hatası: {str(e)}"}
+            desc = item.get("description", item.get("category", "?"))
+            errors.append(f"{desc}: {str(e)}")
+            state["parsed_expenses"].remove(item)
 
-    return {**state, "saved_ids": saved_ids}
+    return {**state, "saved_ids": saved_ids, "error": "; ".join(errors)}
 
 
 # ─── Node 3: Aylık Özet ───────────────────────────────────────

@@ -76,70 +76,7 @@ def data_clean_node(state: MarketAnalystState) -> MarketAnalystState:
     cleaned = "\n---\n".join(cleaned_parts)
     return {**state, "cleaned_data": cleaned}
 
-# ─── Node 2b: Site Fiyat Karşılaştırma ──────────────────────
-import re as _re
 
-def _extract_price(text: str) -> float:
-    """Metinden TL fiyatı çıkar."""
-    text = text or ""
-    patterns = [
-        r'(\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{1,2})?)\s*(?:TL|₺|lira)',
-        r'(\d{3,6}(?:[.,]\d{3})*)',
-    ]
-    for pat in patterns:
-        m = _re.search(pat, text, _re.IGNORECASE)
-        if m:
-            raw = m.group(1).replace('.', '').replace(',', '.')
-            try:
-                val = float(raw)
-                if 10 < val < 1_000_000:
-                    return val
-            except ValueError:
-                pass
-    return 0.0
-
-
-def price_compare_node(state: MarketAnalystState) -> MarketAnalystState:
-    """Aynı ürünün TR e-ticaret sitelerindeki fiyatlarını Tavily ile bulur."""
-    if state.get("error"):
-        return state
-
-    SITES = [
-        ("Trendyol",    "trendyol.com"),
-        ("Hepsiburada", "hepsiburada.com"),
-        ("Amazon TR",   "amazon.com.tr"),
-    ]
-
-    results = []
-    try:
-        for site_name, site_domain in SITES:
-            try:
-                q = f'{state["query"]} site:{site_domain}'
-                r = search_market(q, max_results=2)
-                for item in r.get("results", []):
-                    price = _extract_price(item.get("content", "") + " " + item.get("title", ""))
-                    if price > 0:
-                        results.append({
-                            "site":  site_name,
-                            "price": price,
-                            "url":   item.get("url", ""),
-                            "title": item.get("title", "")[:60],
-                        })
-                        break
-            except Exception:
-                pass
-
-        # En ucuzunu işaretle
-        if results:
-            min_price = min(r["price"] for r in results)
-            for r in results:
-                r["is_cheapest"] = (r["price"] == min_price)
-                r["diff"] = round(r["price"] - min_price, 0)
-
-    except Exception as e:
-        results = []
-
-    return {**state, "price_comparison": results}
 
 
 
@@ -197,7 +134,7 @@ def gemini_analyze_node(state: MarketAnalystState) -> MarketAnalystState:
             model=settings.GEMINI_MODEL,
             contents=ANALYSIS_PROMPT.format(
                 query=state["query"],
-                data=state["cleaned_data"][:8000]  # Token limiti için kırp
+                data=state["cleaned_data"][:15000]  # Token limiti için kırp (~15K karakter ~= 4K token)
             )
         )
         analysis = response.text
@@ -465,12 +402,9 @@ def build_market_analyst():
     graph.add_node("gemini_analyze", gemini_analyze_node)
     graph.add_node("notion_write", notion_write_node)
 
-    graph.add_node("price_compare", price_compare_node)
-
     graph.add_edge(START, "web_search")
     graph.add_edge("web_search", "data_clean")
-    graph.add_edge("data_clean", "price_compare")
-    graph.add_edge("price_compare", "gemini_analyze")
+    graph.add_edge("data_clean", "gemini_analyze")
     graph.add_edge("gemini_analyze", "notion_write")
     graph.add_edge("notion_write", END)
 

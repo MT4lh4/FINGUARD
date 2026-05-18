@@ -143,7 +143,6 @@ function firstText(selectors) {
       const t = el?.innerText?.trim();
       if (t && t.length > 1 && t.length < 500) return t;
     } catch (_) {
-      /* invalid selector */
     }
   }
   const og = document.querySelector('meta[property="og:title"]')?.content?.trim();
@@ -226,7 +225,6 @@ function resolveCartClick(target, event, siteKey) {
         try {
           if (node.matches(sel) && isVisible(node)) return node;
         } catch (_) {
-          /* geçersiz seçici */
         }
       }
 
@@ -270,22 +268,24 @@ function normalizeDecision(d) {
 
 const currentSite = detectSite(window.location.hostname);
 
-// Bug 5: cartEl referansı ve bypass flag
 let _finguardPendingCartEl = null;
 let _finguardBypass = false;
+let _finguardAnalyzing = false;
 
 if (currentSite) {
   document.body.addEventListener(
     "click",
     function (e) {
-      if (_finguardBypass) return;  // kendi tetiklediğimiz click'i yakala
+      if (_finguardBypass) return;
+      if (_finguardAnalyzing) return;
       const cartEl = resolveCartClick(e.target, e, currentSite);
       if (!cartEl) return;
 
       e.preventDefault();
       e.stopPropagation();
 
-      _finguardPendingCartEl = cartEl;  // referansı sakla
+      _finguardPendingCartEl = cartEl;
+      _finguardAnalyzing = true;
 
       const cfg = SITE_CONFIG[currentSite];
       const productName = firstText(cfg.nameSelectors);
@@ -324,6 +324,7 @@ chrome.runtime.onMessage.addListener(function (request) {
   } else if (request.action === "show_error") {
     showFinguardOverlay("Bir hata oluştu: " + (request.error || "Bilinmeyen"), false, "ERROR");
   }
+  _finguardAnalyzing = false;
 });
 
 function showFinguardOverlay(message, isLoading, decision = null, category = null, budget = null, alternatives = null) {

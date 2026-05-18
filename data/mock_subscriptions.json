@@ -8,7 +8,7 @@
     "category": "entertainment",
     "start_date": "2024-03-15",
     "status": "active",
-    "payment_method": "Kredi Kart\u00c4\u00b1 *4521",
+    "payment_method": "Kredi Kartı *4521",
     "cancel_url": "https://www.netflix.com/cancelplan"
   },
   {
@@ -20,7 +20,7 @@
     "category": "entertainment",
     "start_date": "2023-06-01",
     "status": "active",
-    "payment_method": "Kredi Kart\u00c4\u00b1 *4521",
+    "payment_method": "Kredi Kartı *4521",
     "cancel_url": "https://www.spotify.com/account/subscription/"
   },
   {
@@ -32,7 +32,7 @@
     "category": "productivity",
     "start_date": "2024-01-10",
     "status": "active",
-    "payment_method": "Kredi Kart\u00c4\u00b1 *4521",
+    "payment_method": "Kredi Kartı *4521",
     "cancel_url": "https://account.adobe.com/plans"
   },
   {
@@ -56,7 +56,7 @@
     "category": "entertainment",
     "start_date": "2024-09-01",
     "status": "active",
-    "payment_method": "Kredi Kart\u00c4\u00b1 *4521",
+    "payment_method": "Kredi Kartı *4521",
     "cancel_url": "https://www.youtube.com/paid_memberships"
   },
   {
@@ -68,7 +68,7 @@
     "category": "health",
     "start_date": "2024-02-01",
     "status": "active",
-    "payment_method": "Banka Hesab\u00c4\u00b1 *1190",
+    "payment_method": "Banka Hesabı *1190",
     "cancel_url": ""
   },
   {
@@ -92,7 +92,7 @@
     "category": "cloud_storage",
     "start_date": "2023-01-20",
     "status": "active",
-    "payment_method": "Kredi Kart\u00c4\u00b1 *4521",
+    "payment_method": "Kredi Kartı *4521",
     "cancel_url": "https://support.apple.com/en-us/HT202039"
   },
   {
@@ -116,7 +116,7 @@
     "category": "shopping",
     "start_date": "2024-11-01",
     "status": "active",
-    "payment_method": "Kredi Kart\u00c4\u00b1 *4521",
+    "payment_method": "Kredi Kartı *4521",
     "cancel_url": "https://www.amazon.com.tr/gp/primecentral"
   },
   {
@@ -140,7 +140,7 @@
     "category": "security",
     "start_date": "2024-04-01",
     "status": "active",
-    "payment_method": "Kredi Kart\u00c4\u00b1 *4521",
+    "payment_method": "Kredi Kartı *4521",
     "cancel_url": ""
   }
 ]
