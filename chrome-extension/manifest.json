@@ -1,0 +1,34 @@
+{
+  "manifest_version": 3,
+  "name": "FinGuard AI - Impulse Guard",
+  "version": "1.0.1",
+  "description": "Dürtüsel alışverişleri engelleyen yapay zeka destekli finansal vicdanınız.",
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+  "host_permissions": [
+    "*://*.trendyol.com/*",
+    "*://*.hepsiburada.com/*",
+    "*://*.amazon.com.tr/*",
+    "http://localhost:8000/*",
+    "http://127.0.0.1:8000/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.trendyol.com/*",
+        "*://*.hepsiburada.com/*",
+        "*://*.amazon.com.tr/*"
+      ],
+      "js": ["content.js"],
+      "css": ["popup.css"]
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html"
+  }
+}

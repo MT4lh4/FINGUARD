@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FinGuard AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0f1e;
+      --surface:   #0f1629;
+      --surface2:  #151e35;
+      --border:    rgba(255,255,255,0.07);
+      --text-1:    #f1f5f9;
+      --text-2:    #94a3b8;
+      --text-3:    #475569;
+      --blue:      #2563eb;
+      --blue-l:    #60a5fa;
+      --green:     #10b981;
+      --green-l:   #6ee7b7;
+      --red:       #ef4444;
+      --amber:     #f59e0b;
+      --mono:      'DM Mono', monospace;
+      --sans:      'Sora', sans-serif;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text-2);
+      font-family: var(--sans);
+      font-size: 13px;
+      line-height: 1.5;
+      width: 300px;
+      min-height: 100px;
+      overflow: hidden;
+    }
+
+    /* ── Ambient glow bg ─────────────────────── */
+    .ambient {
+      position: fixed;
+      top: -60px; left: 50%;
+      transform: translateX(-50%);
+      width: 260px; height: 120px;
+      background: radial-gradient(ellipse, rgba(37,99,235,0.18) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .popup { position: relative; z-index: 1; }
+
+    /* ── Header ──────────────────────────────── */
+    header {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      padding: 16px 16px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1d4ed8 0%, #7c3aed 100%);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 14px -4px rgba(37,99,235,0.55);
+    }
+
+    .logo-text { flex: 1; }
+    .logo-text h1 {
+      font-size: 14px; font-weight: 700;
+      color: var(--text-1);
+      letter-spacing: -0.3px;
+    }
+    .logo-text span {
+      font-size: 10px;
+      color: var(--text-3);
+      font-family: var(--mono);
+      letter-spacing: 0.4px;
+      display: block;
+      margin-top: 1px;
+    }
+
+    .version-badge {
+      font-size: 9px; font-weight: 600;
+      font-family: var(--mono);
+      letter-spacing: 0.5px;
+      color: var(--text-3);
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 3px 7px;
+      align-self: flex-start;
+      margin-top: 2px;
+    }
+
+    /* ── Section ─────────────────────────────── */
+    section { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    section:last-child { border-bottom: none; }
+
+    .section-label {
+      font-size: 9px; font-weight: 600;
+      font-family: var(--mono);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-3);
+      margin-bottom: 9px;
+    }
+
+    /* ── Status card ─────────────────────────── */
+    .status-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-dot-wrap {
+      position: relative;
+      width: 10px; height: 10px;
+      flex-shrink: 0;
+    }
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--red);
+      transition: background 0.4s;
+    }
+    .status-dot.online { background: var(--green); }
+    .status-dot.checking { background: var(--amber); }
+
+    .status-dot.online::after {
+      content: '';
+      position: absolute;
+      inset: -3px;
+      border-radius: 50%;
+      border: 2px solid var(--green);
+      opacity: 0;
+      animation: ping 1.8s ease-out infinite;
+    }
+
+    @keyframes ping {
+      0%   { transform: scale(0.8); opacity: 0.6; }
+      100% { transform: scale(1.9); opacity: 0; }
+    }
+
+    .status-info { flex: 1; }
+    .status-name {
+      font-size: 12px; font-weight: 600;
+      color: var(--text-1);
+      margin-bottom: 1px;
+    }
+    .status-url {
+      font-size: 10px;
+      font-family: var(--mono);
+      color: var(--text-3);
+    }
+
+    .status-pill {
+      font-size: 9px; font-weight: 700;
+      font-family: var(--mono);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 4px 9px;
+      border-radius: 100px;
+      background: rgba(239,68,68,0.1);
+      color: var(--red);
+      border: 1px solid rgba(239,68,68,0.2);
+      transition: all 0.4s;
+      white-space: nowrap;
+    }
+    .status-pill.online {
+      background: rgba(16,185,129,0.1);
+      color: var(--green);
+      border-color: rgba(16,185,129,0.2);
+    }
+    .status-pill.checking {
+      background: rgba(245,158,11,0.1);
+      color: var(--amber);
+      border-color: rgba(245,158,11,0.2);
+    }
+
+    /* ── How it works ────────────────────────── */
+    .steps { display: flex; flex-direction: column; gap: 7px; }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 9px 12px;
+      background: var(--surface2);
+      border-radius: 9px;
+      border: 1px solid var(--border);
+      transition: border-color 0.2s;
+    }
+    .step:hover { border-color: rgba(255,255,255,0.13); }
+
+    .step-num {
+      font-size: 10px; font-weight: 700;
+      font-family: var(--mono);
+      color: var(--blue-l);
+      background: rgba(37,99,235,0.12);
+      border: 1px solid rgba(37,99,235,0.2);
+      width: 20px; height: 20px;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 0px;
+    }
+
+    .step-body { flex: 1; }
+    .step-title { font-size: 11px; font-weight: 600; color: var(--text-1); margin-bottom: 1px; }
+    .step-desc  { font-size: 10.5px; color: var(--text-3); line-height: 1.4; }
+
+    /* ── Sites ───────────────────────────────── */
+    .sites { display: flex; flex-direction: column; gap: 5px; }
+
+    .site-row {
+      display: flex; align-items: center; gap: 9px;
+      padding: 7px 11px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    .site-emoji { font-size: 14px; width: 20px; text-align: center; }
+
+    .site-name {
+      flex: 1;
+      font-size: 11px; font-weight: 500;
+      color: var(--text-1);
+      font-family: var(--mono);
+    }
+
+    .site-active {
+      font-size: 8px; font-weight: 700;
+      font-family: var(--mono);
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 100px;
+      background: rgba(16,185,129,0.09);
+      color: var(--green);
+      border: 1px solid rgba(16,185,129,0.18);
+    }
+
+    /* ── Footer ──────────────────────────────── */
+    footer {
+      padding: 11px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-top: 1px solid var(--border);
+    }
+
+    .footer-brand {
+      font-size: 10px;
+      color: var(--text-3);
+      font-family: var(--mono);
+      letter-spacing: 0.3px;
+    }
+
+    .docs-link {
+      font-size: 10px; font-weight: 600;
+      font-family: var(--mono);
+      color: var(--blue-l);
+      text-decoration: none;
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 5px 10px;
+      border-radius: 7px;
+      background: rgba(37,99,235,0.09);
+      border: 1px solid rgba(37,99,235,0.18);
+      transition: all 0.2s;
+    }
+    .docs-link:hover {
+      background: rgba(37,99,235,0.16);
+      border-color: rgba(37,99,235,0.3);
+    }
+    .docs-link svg { width: 10px; height: 10px; }
+  </style>
+</head>
+<body>
+<div class="ambient"></div>
+
+<div class="popup">
+
+  <!-- Header -->
+  <header>
+    <div class="logo-icon">🛡️</div>
+    <div class="logo-text">
+      <h1>FinGuard AI</h1>
+      <span>Impulse Guard • Aktif</span>
+    </div>
+    <span class="version-badge">v1.0</span>
+  </header>
+
+  <!-- Backend Status -->
+  <section>
+    <div class="section-label">Backend Durumu</div>
+    <div class="status-card">
+      <div class="status-dot-wrap">
+        <div class="status-dot checking" id="dot"></div>
+      </div>
+      <div class="status-info">
+        <div class="status-name">FastAPI Sunucusu</div>
+        <div class="status-url">127.0.0.1:8000</div>
+      </div>
+      <span class="status-pill checking" id="pill">KONTROL…</span>
+    </div>
+  </section>
+
+  <!-- How it works -->
+  <section>
+    <div class="section-label">Nasıl Çalışır</div>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-body">
+          <div class="step-title">Sepete Ekle'yi Tıkla</div>
+          <div class="step-desc">Desteklenen bir sitede alışveriş yap, buton tıklaması otomatik yakalanır.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-body">
+          <div class="step-title">Yapay Zeka Analiz Eder</div>
+          <div class="step-desc">Ürün bilgisi backend'e gönderilir, AI bütçeni ve alışveriş geçmişini inceler.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-body">
+          <div class="step-title">Karar Gelir</div>
+          <div class="step-desc">AL / BEKLE / ALTERNATİFLERE BAK / KESİNLİKLE ALMA kararı ekranda belirir.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Supported Sites -->
+  <section>
+    <div class="section-label">Desteklenen Siteler</div>
+    <div class="sites">
+      <div class="site-row">
+        <span class="site-emoji">🛍️</span>
+        <span class="site-name">trendyol.com</span>
+        <span class="site-active">AKTİF</span>
+      </div>
+      <div class="site-row">
+        <span class="site-emoji">🟠</span>
+        <span class="site-name">hepsiburada.com</span>
+        <span class="site-active">AKTİF</span>
+      </div>
+      <div class="site-row">
+        <span class="site-emoji">📦</span>
+        <span class="site-name">amazon.com.tr</span>
+        <span class="site-active">AKTİF</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer>
+    <span class="footer-brand">FinGuard AI © 2025</span>
+    <a class="docs-link" href="http://127.0.0.1:8000/docs" target="_blank" rel="noopener">
+      API Docs
+      <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M2 10L10 2M5.5 2H10v4.5"/>
+      </svg>
+    </a>
+  </footer>
+
+</div>
+
+<script>
+  const dot  = document.getElementById('dot');
+  const pill = document.getElementById('pill');
+
+  async function checkBackend() {
+    try {
+      const res = await fetch('http://127.0.0.1:8000/', { method: 'GET', signal: AbortSignal.timeout(3000) });
+      if (res.ok || res.status < 500) {
+        dot.className  = 'status-dot online';
+        pill.className = 'status-pill online';
+        pill.textContent = 'ÇEVRIMIÇI';
+      } else { throw new Error('Server error'); }
+    } catch {
+      dot.className  = 'status-dot';
+      pill.className = 'status-pill';
+      pill.textContent = 'ÇEVRIMDIŞI';
+    }
+  }
+
+  checkBackend();
+  setInterval(checkBackend, 8000);
+</script>
+</body>
+</html>
