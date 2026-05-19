@@ -142,7 +142,7 @@ async def budget_log(req: ChatRequest):
     """
     try:
         from agents.budget_logger import run_budget_logger
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         result = await loop.run_in_executor(_executor, run_budget_logger, req.message)
         return {
             "response":        result.get("response", ""),
@@ -166,7 +166,7 @@ async def chat(request: ChatRequest):
         raise HTTPException(status_code=400, detail="Mesaj boş olamaz")
 
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         result = await loop.run_in_executor(_executor, run_orchestrator, request.message)
 
         agent = result["agent_outputs"].get("agent", "unknown")
@@ -320,7 +320,7 @@ async def api_market_analyze(req: MarketRequest):
     Yapılandırılmış kart verisi döndürür.
     """
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         result = await loop.run_in_executor(_executor, run_market_analyst, req.query)
         return result
     except Exception as e:
@@ -336,7 +336,7 @@ async def analyze_product(product: ProductAnalysisRequest):
     Alternatif ürün verilerini de döndürür.
     """
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         import functools
         result = await loop.run_in_executor(
             _executor,
@@ -359,7 +359,7 @@ async def analyze_product(product: ProductAnalysisRequest):
 async def scan_subscriptions():
     """Kullanicinin aboneliklerini tarar, hayalet abonelikleri tespit eder."""
     try:
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         result = await loop.run_in_executor(_executor, run_subscription_slayer)
         if result.get("error"):
             raise HTTPException(status_code=500, detail=result["error"])
@@ -377,7 +377,7 @@ async def analyze_custom_subscriptions(subscriptions: list[dict]):
 
     try:
         import functools
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         result = await loop.run_in_executor(
             _executor,
             functools.partial(run_subscription_slayer, custom_subscriptions=subscriptions)
