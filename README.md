@@ -55,10 +55,12 @@ All four agents run under a single **LangGraph orchestrator** that automatically
     <td><img src="screenshots/Market Analyst.png" alt="Market Analyst" width="100%"/></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><b>🛡️ Impulse Guard</b></td>
+    <td align="center"><b>🛡️ Impulse Guard</b></td>
+    <td align="center"><b>🧩 Chrome Extension</b></td>
   </tr>
   <tr>
-    <td colspan="2" align="center"><img src="screenshots/Impulse Guard.png" alt="Impulse Guard" width="50%"/></td>
+    <td align="center"><img src="screenshots/Impulse Guard.png" alt="Impulse Guard" width="100%"/></td>
+    <td align="center"><img src="screenshots/Extension.png" alt="Extension" width="100%"/></td>
   </tr>
 </table>
 
